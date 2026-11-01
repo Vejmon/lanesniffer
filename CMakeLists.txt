@@ -44,8 +44,8 @@ pico_set_program_version(lanesniffer "0.1")
 pico_generate_pio_header(lanesniffer ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(lanesniffer 1)
-pico_enable_stdio_usb(lanesniffer 0)
+pico_enable_stdio_uart(lanesniffer 0)
+pico_enable_stdio_usb(lanesniffer 1)
 
 # Add the standard library to the build
 target_link_libraries(lanesniffer
