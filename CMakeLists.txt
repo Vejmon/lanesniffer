@@ -66,7 +66,6 @@ target_link_libraries(lanesniffer
         hardware_timer
         hardware_watchdog
         hardware_clocks
-        hardware_rtc
         )
 
 pico_add_extra_outputs(lanesniffer)
