@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Initialise pico_sdk from installed location
-# (note this can come from environment, CMake cache etc)
+# (note this can come from environment, cache etc)
 
 # == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
 if(WIN32)
@@ -57,7 +57,7 @@ target_include_directories(lanesniffer PRIVATE
 )
 
 # Add any user requested libraries
-target_link_libraries(lanesniffer 
+target_link_libraries(lanesniffer
         hardware_spi
         hardware_i2c
         hardware_dma
@@ -66,7 +66,7 @@ target_link_libraries(lanesniffer
         hardware_timer
         hardware_watchdog
         hardware_clocks
+        hardware_rtc
         )
 
 pico_add_extra_outputs(lanesniffer)
-
