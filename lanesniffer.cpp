@@ -1,16 +1,25 @@
 #include "pico/stdlib.h"
 #include "hardware/watchdog.h"
+#include "pico/binary_info.h"
 #include <cstdio>
+
+bi_decl(bi_ptr_string(
+    BINARY_INFO_MAKE_TAG('V', 'J'),
+    0x4c534e01,
+    current_epoch_millis,
+    "0",
+    14
+));
 
 static constexpr uint BUTTON_PINS[] = {16, 17, 18,19};
 
 static void gpio_callback(uint gpio, uint32_t events)
 {
     if (events & GPIO_IRQ_EDGE_FALL) {
-        printf("Button on GP%u triggered\n", gpio);
+        printf("Button on GP%u triggered, elapsed: %llu, current_epoch_millis: %s\n", gpio, (unsigned long long)time_us_64(), current_epoch_millis);
     }
 }
-
+    
 int main()
 {
     stdio_init_all();
