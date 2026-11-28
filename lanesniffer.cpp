@@ -1,6 +1,7 @@
 #include "pico/stdlib.h"
 #include "hardware/watchdog.h"
 #include "pico/binary_info.h"
+#include "pico/critical_section.h"   // ← add this
 #include <cstdio>
 
 bi_decl(bi_ptr_string(
@@ -11,18 +12,23 @@ bi_decl(bi_ptr_string(
     14
 ));
 
-static constexpr uint BUTTON_PINS[] = {16, 17, 18,19};
+static constexpr uint BUTTON_PINS[] = {16, 17, 15, 14};
+
+static critical_section_t print_cs;  // ← add this
 
 static void gpio_callback(uint gpio, uint32_t events)
 {
     if (events & GPIO_IRQ_EDGE_FALL) {
-        printf("Button on GP%u triggered, elapsed: %llu, current_epoch_millis: %s\n", gpio, (unsigned long long)time_us_64(), current_epoch_millis);
+        critical_section_enter_blocking(&print_cs);
+        printf("GP%u:%llu\n", gpio, (unsigned long long)time_us_64());
+        critical_section_exit(&print_cs);
     }
 }
-    
+
 int main()
 {
     stdio_init_all();
+    critical_section_init(&print_cs);  // ← add this (claims a HW spinlock)
 
     for (uint pin : BUTTON_PINS) {
         gpio_init(pin);
@@ -30,26 +36,21 @@ int main()
         gpio_pull_up(pin);
     }
 
-    // Pin 16 registers the callback. Pin 17 is enabled separately.
     gpio_set_irq_enabled_with_callback(
-        16,
-        GPIO_IRQ_EDGE_FALL,
-        true,
-        gpio_callback
+        16, GPIO_IRQ_EDGE_FALL, true, gpio_callback
     );
     gpio_set_irq_enabled(17, GPIO_IRQ_EDGE_FALL, true);
+    gpio_set_irq_enabled(15, GPIO_IRQ_EDGE_FALL, true);
+    gpio_set_irq_enabled(14, GPIO_IRQ_EDGE_FALL, true);
 
     if (watchdog_caused_reboot()) {
         printf("Rebooted by watchdog\n");
     }
 
-    // Reset unless watchdog_update() is called every 1100 ms.
     watchdog_enable(1100, true);
 
     while (true) {
-        // sleep_ms wakes periodically, so watchdog_update() is refreshed
-        // even when neither button is pressed.
         sleep_ms(100);
         watchdog_update();
     }
-}
+}   
